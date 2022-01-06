@@ -285,7 +285,7 @@ class COLOR(BASE_INT):
 
 BIN_NONE        = b'\x00'
 BIN_STRING      = b'\x01'
-BIN_INT32       = b'\x02'
+BIN_UINT32      = b'\x02'
 BIN_FLOAT32     = b'\x03'
 BIN_POINTER     = b'\x04'
 BIN_WIDESTRING  = b'\x05'
@@ -332,7 +332,7 @@ def binary_load(fp, mapper=dict, merge_duplicate_keys=True, alt_format=False, ra
         raise TypeError("Expected mapper to be subclass of dict, got %s" % type(mapper))
 
     # helpers
-    int32 = struct.Struct('<i')
+    uint32 = struct.Struct('<I')
     uint64 = struct.Struct('<Q')
     int64 = struct.Struct('<q')
     float32 = struct.Struct('<f')
@@ -395,8 +395,8 @@ def binary_load(fp, mapper=dict, merge_duplicate_keys=True, alt_format=False, ra
             stack[-1][key] = read_string(fp)
         elif t == BIN_WIDESTRING:
             stack[-1][key] = read_string(fp, wide=True)
-        elif t in (BIN_INT32, BIN_POINTER, BIN_COLOR):
-            val = int32.unpack(fp.read(int32.size))[0]
+        elif t in (BIN_UINT32, BIN_POINTER, BIN_COLOR):
+            val = uint32.unpack(fp.read(uint32.size))[0]
 
             if t == BIN_POINTER:
                 val = POINTER(val)
@@ -445,7 +445,7 @@ def _binary_dump_gen(obj, level=0, alt_format=False):
     if level == 0 and len(obj) == 0:
         return
 
-    int32 = struct.Struct('<i')
+    uint32 = struct.Struct('<I')
     uint64 = struct.Struct('<Q')
     int64 = struct.Struct('<q')
     float32 = struct.Struct('<f')
@@ -480,9 +480,9 @@ def _binary_dump_gen(obj, level=0, alt_format=False):
             elif isinstance(value, POINTER):
                 yield BIN_POINTER
             else:
-                yield BIN_INT32
+                yield BIN_UINT32
             yield key + BIN_NONE
-            yield int32.pack(value)
+            yield uint32.pack(value)
         else:
             raise TypeError("Unsupported type: %s" % type(value))
 
